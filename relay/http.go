@@ -21,20 +21,20 @@ import (
 
 // HTTP is a relay for HTTP influxdb writes
 type HTTP struct {
-	addr                string
-	name                string
-	schema              string
+	addr   string
+	name   string
+	schema string
 
 	pingResponseCode    int
 	pingResponseHeaders map[string]string
 
-	cert                string
-	rp                  string
+	cert string
+	rp   string
 
-	closing             int64
-	l                   net.Listener
+	closing int64
+	l       net.Listener
 
-	backends            []*httpBackend
+	backends []*httpBackend
 }
 
 const (
@@ -48,18 +48,19 @@ const (
 )
 
 func NewHTTP(cfg HTTPConfig) (Relay, error) {
-	h := new(HTTP)
-
-	h.addr = cfg.Addr
-	h.name = cfg.Name
+	h := &HTTP{
+		addr:                cfg.Addr,
+		name:                cfg.Name,
+		pingResponseHeaders: map[string]string{},
+	}
 
 	h.pingResponseCode = DefaultHttpPingResponse
-	if (cfg.DefaultPingResponse != 0) {
+	if cfg.DefaultPingResponse != 0 {
 		h.pingResponseCode = cfg.DefaultPingResponse
 	}
 
 	h.pingResponseHeaders["X-InfluxDB-Version"] = "relay"
-	if (h.pingResponseCode != http.StatusNoContent) {
+	if h.pingResponseCode != http.StatusNoContent {
 		h.pingResponseHeaders["Content-Length"] = "0"
 	}
 
